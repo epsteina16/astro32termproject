@@ -17,6 +17,10 @@ uBars = np.zeros(9)
 gBars = np.zeros(9)
 
 
+# Step 1, 2: Clean the data
+# Remove entries with null values (-9999)
+# Remove entries with redshifts greater than 0.3 (too far)
+
 for i in range(len(uData) - 1):
 	if uData[i] == -9999.0:
 		uData = np.delete(uData, i)
@@ -40,7 +44,6 @@ for i in range(len(gData) - 1):
 			gBars[bottom - 13] += 1
 i = 0
 while i < len(zData):
-	#limit redshifts to .3 - z << 1 - "arbitrary as fuck"
 	if zData[i] <= 0 or zData[i] > .3:
 		gData = np.delete(gData, i)
 		zData = np.delete(zData, i)
@@ -49,7 +52,9 @@ while i < len(zData):
 	i += 1
 
 
-def bar1():
+# Step 3: u-g color distribution plot
+
+def ugDistPlot():
 	plt.bar(np.arange(12.8,21.8, 1), uBars, width=0.25, align="edge", label="u", color="b", hatch="//")
 	plt.bar(np.arange(13.2,22.2, 1), gBars, width=0.25, label="g", color="g")
 	plt.xticks(np.arange(13,22))
@@ -62,12 +67,16 @@ def bar1():
 
 	plt.savefig("histogram.png")
 
+# Step 4: Ram Luminosity Function
+
+# compute distance via redshift (d = cz/H0)
 def redshiftDistance(x):
 	#H0 used is 73.8
 	H0 = 73.8
 	y = [((299792 * z)/H0) * 1000000 for z in x]
 	return y
 
+# compute absolute magnitude via distance and apparent magnitude (distance modulus)
 def absMags(x, u):
 	absMagnitudes = []
 	j = 0
@@ -77,11 +86,14 @@ def absMags(x, u):
 		j += 1
 	return absMagnitudes
 
+
+# separate absolute magnitudes into bins
 def distributeMagnitudes(mags):
 	magBins = np.zeros(58)
 	for mag in mags:
 		magBins[math.floor(mag) + 24] += 1
 	return magBins
+
 
 def calcEffectiveVolume():
 	#from range -82 to -24
