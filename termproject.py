@@ -83,20 +83,33 @@ def distributeMagnitudes(mags):
 		magBins[math.floor(mag) + 24] += 1
 	return magBins
 
+def calcEffectiveVolume():
+
 
 def rawLum():
 	#RA range 145 to 236 degrees
 	#Dec range -2 to 2 degrees
+	#r is 1219.5122 Mpc
+	#volume calculated for survey is 2338967.98142
 	distances = redshiftDistance(zData)
 	maxDistance = max(distances)
 	absoluteMags = absMags(distances, uData)
 
 	#need volume to get number density (#/volume in each bin)
 	magBins = distributeMagnitudes(absoluteMags)
-	print(magBins)
+	vol = 2338967.98142
+	lumFunc = [x / vol for x in magBins]
 
-	plt.plot(np.arange(-82, -24, 1), magBins, "r")
-	plt.show()
+	#correct malmquist bias
+	#using h=300pc, Omega = 1
+	
+
+
+	plt.plot(np.arange(-82, -24, 1), lumFunc, "r")
+	plt.xlabel("Absolute Magnitude")
+	plt.ylabel("#/volume (Mpc^3)")
+	plt.title("Raw Luminosity Function for SDSS data")
+	plt.savefig("rawlum.png")
 
 rawLum()
 
