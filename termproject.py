@@ -121,6 +121,7 @@ def rawLum():
 
 	#need volume to get number density (#/volume in each bin)
 	magBins = distributeMagnitudes(absoluteMags)
+	print(magBins)
 	vol = 2338967.98142
 	lumFunc = [x / vol for x in magBins]
 
