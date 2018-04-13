@@ -65,7 +65,7 @@ def bar1():
 def redshiftDistance(x):
 	#H0 used is 73.8
 	H0 = 73.8
-	y = [((299792 * z)/73.8) * 1000000 for z in x]
+	y = [((299792 * z)/H0) * 1000000 for z in x]
 	return y
 
 def absMags(x, u):
@@ -84,6 +84,30 @@ def distributeMagnitudes(mags):
 	return magBins
 
 def calcEffectiveVolume():
+	#from range -82 to -24
+	#lim mag is 17.6
+	limMag = 17.6
+	h = .3
+	Omega = 1
+
+	effectiveVols = []
+	Vmaxs = []
+	for y in range(-82, -23):
+		dmax = pow(10, (limMag - y + 5)/5)
+		dmax = dmax / 1000000
+		x = dmax/h
+		effV = Omega * (h**3) * ((.5 * pow(x,2)) + ((x + 1)*math.exp(-1 * x)) - 1)
+		effectiveVols.append(effV)
+
+		vol = math.pi * pow((h / 2), 2) * (dmax / 3)
+		Vmaxs.append(vol)
+	return effectiveVols, Vmaxs
+
+def calcVratios(Veffs, Vmaxs):
+	result = []
+	for i in range(len(Veffs)):
+		result.append(Veffs[i]/Vmaxs[i])
+	return result
 
 
 def rawLum():
@@ -102,10 +126,16 @@ def rawLum():
 
 	#correct malmquist bias
 	#using h=300pc, Omega = 1
-	
+	effectiveVols, Vmaxs = calcEffectiveVolume()
+	Vratios = calcVratios(effectiveVols, Vmaxs)
+	#print(effectiveVols)
+	correctedLumFunc = []
+	for x in range(len(magBins)):
+		correctedLumFunc.append(magBins[x]/Vratios[x])
 
 
-	plt.plot(np.arange(-82, -24, 1), lumFunc, "r")
+	#plt.plot(np.arange(-82, -24, 1), lumFunc, "r")
+	plt.plot(np.arange(-82, -24, 1), correctedLumFunc, "b")
 	plt.xlabel("Absolute Magnitude")
 	plt.ylabel("#/volume (Mpc^3)")
 	plt.title("Raw Luminosity Function for SDSS data")
