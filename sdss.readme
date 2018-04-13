@@ -1,0 +1,45 @@
+Prepared September 29, 2014 
+By Anna Sajina
+
+This file accompanies sdss.fits this is used in the Astro32 term project. 
+
+The file was obtained from the Sloan Digital Sky Survey (SDSS) data release 7 (DR7). 
+
+It contains data on SDSS galaxies with the following selection criteria:
+	 1) RA range 145 to 236 degrees
+	 2) Dec range -2 to 2 degrees
+	 3) r-band magnitude brighter than 17.6
+
+The criteria are such as to have an unbiased sample of galaxies with very high level of redshift completeness (i.e. most of the galaxies have their redshifts measured so their distances and absolute magnitudes can be determined).
+
+The data format is a FITS file which is a standart astronomy binary data file. A fits header always includes a header which gives information on the data, such as what the data is of, who created the file, when, and much more. It also includes one or more "science" extensions which may be an image or a data table (as is the case here). 
+
+To open it in python you'll first need to install the astropy library. Please follow this link for details of how to do so for your particular system.
+
+http://www.astropy.org/
+
+To open and examine the contents of a FITS file see the following website:
+
+http://docs.astropy.org/en/v0.3/io/fits/index.html
+
+With these guidelines, examine the sdss.fits file. You should notice the following columns --- u,g,r, and z. 
+
+The first 3 are photometric measurements in AB magnitudes. Don't worry about what exactly "AB" means here, just note these are APPARENT magnitudes. You could use them to create color arrays (see project notes in Lecture 9). 
+
+The last is the redshift (you'll learn more about redshifts and how they relate to distance in the lecture on the distance ladder (Lecture 13). 
+ 
+For reference, you should compare your final luminosity function with the one found in Blanton et al. (2003)
+http://arxiv.org/abs/astro-ph/0210215
+
+Below is more detail than you need, it is more for my reference
+The specific SQL query I ran on January 25, 2012 was:
+
+SELECT p.objid,p.ra,p.dec,p.u,p.g,p.r,s.z
+FROM galaxy AS p
+ JOIN SpecObj AS s ON s.bestobjid = p.objid
+WHERE p.ra between 145 and 236
+ AND p.dec between -2 and 2
+ AND p.r <=17.6
+
+
+
