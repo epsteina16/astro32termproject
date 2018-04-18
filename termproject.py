@@ -157,7 +157,7 @@ def allGalaxiesPlot(x, lumFunc, correctedLumFunc):
 	plt.yscale('log')
 	plt.xlabel("Absolute Magnitude")
 	plt.ylabel("#/volume (Mpc^3)")
-	plt.title("Raw Luminosity Function for SDSS data")
+	plt.title("Luminosity Function for SDSS data")
 	plt.savefig("luminosity_function.png")
 
 # corrected luminosity function plots for all galaxies, red and blue separate
@@ -167,7 +167,38 @@ def redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
+	plt.xlabel("Absolute Magnitude")
+	plt.ylabel("#/volume (Mpc^3)")
+	plt.title("Corrected Luminosity Functions for SDSS data")
 	plt.savefig("red_blue_all_luminosity.png")
+
+#schecter function
+def schecter(M):
+	alpha = -1.13
+	Mstar = -20.8
+
+	result = []
+	for m in M:
+		part1 = pow(10, -0.4 * (alpha + 1) * m)
+		print(m)
+		power = -10**(0.4 * (Mstar - m))
+		part2 = math.exp(power)
+		result.append(part1 * part2)
+	return result
+
+# schecter function over correct luminosity functions
+def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
+
+	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
+	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
+	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
+	plt.plot(x, schecter(x), "y", label="Schecter Function")
+	plt.legend(prop={'size': 7})
+	plt.yscale('log')
+	plt.xlabel("Absolute Magnitude")
+	plt.ylabel("#/volume (Mpc^3)")
+	plt.title("Schecter Function for SDSS data")
+	plt.savefig("schecter.png")
 
 # malmquist bias correction
 # returns correct luminosity function
@@ -218,7 +249,10 @@ def luminosityFunction():
 	x2 = np.arange(min(blueMags), max(blueMags), 1)
 
 	#plot for red, blue, all
-	redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc)
+	#redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc)
+
+	#plot for red, blue, all, schecter
+	redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc)
 	
 luminosityFunction()
 #ugDistPlot()
