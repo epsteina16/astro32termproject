@@ -14,7 +14,7 @@ maxR = (c * zmax) / H0
 limMag = 17.6
 h = 3.0/Mega # Mpc
 colorDifference = 1.565
-stepsPerMag = 20
+stepsPerMag = 5
 
 hdulist = fits.open("sdss.fits")
 
@@ -158,6 +158,7 @@ def calcVratios(Veffs, Vmaxs):
 
 # raw and corrected lminosity function plot for all galaxies
 def allGalaxiesPlot(x, lumFunc, correctedLumFunc):
+	plt.clf()
 	plt.plot(x, lumFunc, "r", label="Raw Luminosity Function")
 	plt.plot(x, correctedLumFunc, "b", label="Corrected Luminosity Function")
 	plt.legend(prop={'size': 7})
@@ -170,6 +171,7 @@ def allGalaxiesPlot(x, lumFunc, correctedLumFunc):
 # corrected luminosity function plots for all galaxies, red and blue separate
 def redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 	print("redblue")
+	plt.clf()
 	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
 	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
 	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
@@ -198,6 +200,7 @@ def schecter(M):
 # schecter function over correct luminosity functions
 def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 	print("redblue schecter")
+	plt.clf()
 	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
 	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
 	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
@@ -213,7 +216,10 @@ def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 # returns correct luminosity function
 def malmquistCorrection(magHist, magBins):
 	print("malmquist")
-	effectiveVols, Vmaxs = effectiveVolume(magBins-1)
+	magBins = magBins.tolist()
+	magBins = [round(i, 2) for i in magBins]
+
+	effectiveVols, Vmaxs = effectiveVolume(magBins)
 	Vratios = calcVratios(effectiveVols, Vmaxs)
 	
 	correctedLumFunc = []
