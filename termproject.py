@@ -141,7 +141,7 @@ def effectiveVolume(mags):
 		dmax = pow(10, (limMag - mags[y] + 5)/5)
 		dmax = dmax / Mega # convert to Mpc
 		x = dmax/h
-		Omega = 1.e6 #scalar to shift the graph
+		Omega = 1.e5 #scalar to shift the graph
 		effV = Omega * (h**3) * ((.5 * pow(x,2)) + ((x + 1)*math.exp(-1 * x)) - 1)
 		effectiveVols.append(effV)
 
