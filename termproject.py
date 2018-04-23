@@ -14,6 +14,7 @@ maxR = (c * zmax) / H0
 limMag = 17.6
 h = 3.0/Mega # Mpc
 colorDifference = 1.565
+stepsPerMag = 20
 
 hdulist = fits.open("sdss.fits")
 
@@ -106,6 +107,7 @@ def absMags(dists, mags):
 # dists is a list of distance
 # mags is a list of apparent magnitude
 def sortAbsMags(dists, mags):
+	print("sort abs mags")
 	red = []
 	blue = []
 	j = 0
@@ -119,21 +121,25 @@ def sortAbsMags(dists, mags):
 	return red, blue
 
 
-# separate absolute magnitudes into bins
-def distributeMagnitudes(mags, length, minV):
-	magBins = np.zeros(length + 1)
-	for mag in mags:
-		magBins[math.floor(mag) + minV] += 1
-	return magBins
+# # separate absolute magnitudes into bins
+# def distributeMagnitudes(mags, length, maxM, minM, bins):
+# 	print("dist mags")
+# 	magBins = np.zeros(bins)
+# 	magRange = maxM - minM
+# 	binSize = magRange/bins
+# 	for mag in mags:
+# 		magDif = mag-minM
+# 		magBins[math.floor(magDif/binSize)] += 1
+# 	return magBins
 
 
 def effectiveVolume(mags):
-	print("m", mags)
+	print("effective vol")
 	effectiveVols = []
 	Vmaxs = []
 	for y in range(len(mags)):
 		dmax = pow(10, (limMag - mags[y] + 5)/5)
-		dmax = dmax / Mega
+		dmax = dmax / Mega # convert to Mpc
 		x = dmax/h
 		Omega = 1.e6 #scalar to shift the graph
 		effV = Omega * (h**3) * ((.5 * pow(x,2)) + ((x + 1)*math.exp(-1 * x)) - 1)
@@ -144,6 +150,7 @@ def effectiveVolume(mags):
 	return effectiveVols, Vmaxs
 
 def calcVratios(Veffs, Vmaxs):
+	print("vratios")
 	result = []
 	for i in range(len(Veffs)):
 		result.append(Veffs[i]/Vmaxs[i])
@@ -162,9 +169,10 @@ def allGalaxiesPlot(x, lumFunc, correctedLumFunc):
 
 # corrected luminosity function plots for all galaxies, red and blue separate
 def redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
-	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
+	print("redblue")
 	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
 	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
+	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
 	plt.xlabel("Absolute Magnitude")
@@ -174,13 +182,14 @@ def redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 
 #schecter function
 def schecter(M):
+	print("schecter")
 	alpha = -1.13
 	Mstar = -20.8
 
 	result = []
 	for m in M:
 		part1 = pow(10, -0.4 * (alpha + 1) * m)
-		print(m)
+		# print(m)
 		power = -10**(0.4 * (Mstar - m))
 		part2 = math.exp(power)
 		result.append(part1 * part2)
@@ -188,10 +197,10 @@ def schecter(M):
 
 # schecter function over correct luminosity functions
 def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
-
-	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
+	print("redblue schecter")
 	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
 	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
+	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
 	plt.plot(x, schecter(x), "y", label="Schecter Function")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
@@ -202,57 +211,114 @@ def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 
 # malmquist bias correction
 # returns correct luminosity function
-def malmquistCorrection(absoluteMags, magBins):
-	absMagnitudesList = []
-	absMagsRange = range(math.floor(max(absoluteMags)), math.floor(min(absoluteMags)), -1)
-	for i in absMagsRange:
-		absMagnitudesList.insert(0, i)
-	
-	effectiveVols, Vmaxs = effectiveVolume(absMagnitudesList)
+def malmquistCorrection(magHist, magBins):
+	print("malmquist")
+	effectiveVols, Vmaxs = effectiveVolume(magBins-1)
 	Vratios = calcVratios(effectiveVols, Vmaxs)
 	
 	correctedLumFunc = []
-	for x in range(len(magBins)):
-		correctedLumFunc.append(magBins[x]/effectiveVols[x])
+	for x in range(len(magHist)):
+		correctedLumFunc.append(magHist[x]/effectiveVols[x])
 
 	return correctedLumFunc
 
 # raw and corrected luminosity functions
 def luminosityFunction():
+	print("luminosity")
 	distances = redshiftDistance(zData)
 	absoluteMags = absMags(distances, rData)
-
+	print(max(absoluteMags),min(absoluteMags))
+	dif = max(absoluteMags)-min(absoluteMags)
+	bins = np.arange(math.floor(min(absoluteMags)),math.ceil(max(absoluteMags)),1/stepsPerMag)
+	print(bins)
 	#need volume to get number density (#/volume in each bin)
-	magBins = distributeMagnitudes(absoluteMags, math.floor(max(absoluteMags) - min(absoluteMags)), abs(math.floor(min(absoluteMags))) - 1)
-	
+	magHist, magBins, magPatches = plt.hist(absoluteMags, bins, histtype='step')
+	# magBins = distributeMagnitudes(absoluteMags, math.floor(max(absoluteMags) - min(absoluteMags)), 
+							# math.ceil(max(absoluteMags)), math.floor(min(absoluteMags)), len(absoluteMags)*3)
+	plt.clf()
+	trailingZeroes = 0
+	for x in range(len(magHist)-1,0,-1):
+		if magHist[x] == 0.:
+			trailingZeroes += 1
+		else:
+			break
+	print("mag trail: ", trailingZeroes)
+	for x in range(1,len(magHist)-trailingZeroes):
+		if magHist[x] == 0.:
+			magHist[x] = magHist[x-1]
+
+	magBins = np.delete(magBins, 0)
+	magHist = magHist[0:len(magHist)-trailingZeroes]
+	magBins = magBins[0:len(magBins)-trailingZeroes]
+	print("maghistlen", len(magHist))
+	# print("rdata len: " + str(len(rData)), "magHist len: " + str(len(magHist)), "magBins len: " + str(len(magBins)))
+	print(len(magHist), magHist, "\n", len(magBins), magBins)
 	#solid angle * r^3
 	vol = pow(maxR,3) * solidAngle #mpc^3
-	lumFunc = [x / vol for x in magBins]
-
+	lumFunc = [x / vol for x in magHist]
 	#correct malmquist bias
-	correctedLumFunc = malmquistCorrection(absoluteMags, magBins)
+	correctedLumFunc = malmquistCorrection(magHist, magBins)
 	
-	x = np.arange(min(absoluteMags), max(absoluteMags), 1)
+	# x = np.arange(min(absoluteMags), max(absoluteMags)-(magBins[1]-magBins[0])*1, magBins[1]-magBins[0])
 
 	#plot for all galaxies
-	#allGalaxiesPlot(x, lumFunc, correctedLumFunc)
-
+	allGalaxiesPlot(magBins, lumFunc, correctedLumFunc)
 	#separated by red and blue galaxies
 	redMags, blueMags = sortAbsMags(distances, rData)
-	redBins = distributeMagnitudes(redMags, math.floor(max(redMags) - min(redMags)), abs(math.floor(min(redMags))) - 1)
-	blueBins = distributeMagnitudes(blueMags, math.floor(max(blueMags) - min(blueMags)), abs(math.floor(min(blueMags))) - 1)
-	
-	redLumFunc = malmquistCorrection(redMags, redBins)
-	blueLumFunc = malmquistCorrection(blueMags, blueBins)
 
-	x1 = np.arange(min(redMags), max(redMags), 1)
-	x2 = np.arange(min(blueMags), max(blueMags), 1)
+	rbins = np.arange(math.floor(min(redMags)),math.ceil(max(redMags)),1/stepsPerMag)
+	bbins = np.arange(math.floor(min(blueMags)),math.ceil(max(blueMags)),1/stepsPerMag)
+	
+	redHist, redBins, redPatches = plt.hist(redMags, rbins, histtype="step")
+	blueHist, blueBins, bluePatches = plt.hist(blueMags, bbins, histtype="step")
+	redBins = np.delete(redBins, 0)
+	blueBins = np.delete(blueBins, 0)
+	redHist = redHist[0:len(redHist)-trailingZeroes]
+	redBins = redBins[0:len(redBins)-trailingZeroes]
+	blueHist = blueHist[0:len(blueHist)-trailingZeroes]
+	blueBins = blueBins[0:len(blueBins)-trailingZeroes]
+	print(len(redHist), redHist, "\n")#, len(redBins), redBins)
+	print(len(blueHist), blueHist,"\n")#, len(blueBins), blueBins)
+	plt.clf()
+	# redBins = distributeMagnitudes(redMags, math.floor(max(redMags) - min(redMags)), 
+					# math.ceil(max(redMags)), math.floor(min(redMags)), len(redMags)*3)
+	# blueBins = distributeMagnitudes(blueMags, math.floor(max(blueMags) - min(blueMags)), 
+					# math.ceil(max(blueMags)), math.floor(min(blueMags)), len(blueMags)*3)
+	
+	trailingZeroes = 0
+	for x in range(len(redHist)-1,0,-1):
+		if redHist[x] == 0.:
+			trailingZeroes += 1
+		else:
+			break
+	print("red trail: ", trailingZeroes)
+	for x in range(1,len(redHist)-trailingZeroes):
+		if redHist[x] == 0.:
+			redHist[x] = redHist[x-1]
+
+	trailingZeroes = 0
+	for x in range(len(blueHist)-1,0,-1):
+		if blueHist[x] == 0.:
+			trailingZeroes += 1
+		else:
+			break
+	print("blue trail: ", trailingZeroes)
+	for x in range(1,len(blueHist)-trailingZeroes):
+		if blueHist[x] == 0.:
+			blueHist[x] = blueHist[x-1]
+	redLumFunc = malmquistCorrection(redHist, redBins)
+	blueLumFunc = malmquistCorrection(blueHist, blueBins)
+
+	# x1 = np.arange(min(redMags), max(redMags)-(redBins[1]-redBins[0])+.01, redBins[1]-redBins[0])
+	# x2 = np.arange(min(blueMags), max(blueMags)-(blueBins[1]-blueBins[0])+.01, blueBins[1]-blueBins[0])
+	x1 = np.arange(math.floor(min(redMags)),math.ceil(max(redMags)),1/4)
+	x2 = np.arange(math.floor(min(blueMags)),math.ceil(max(blueMags)),1/4)
 
 	#plot for red, blue, all
-	#redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc)
+	redBluePlot(magBins, correctedLumFunc, redBins, redLumFunc, blueBins, blueLumFunc)
 
 	#plot for red, blue, all, schecter
-	redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc)
+	redBluePlotSchecter(magBins, correctedLumFunc, redBins, redLumFunc, blueBins, blueLumFunc)
 	
 luminosityFunction()
 #ugDistPlot()
