@@ -159,8 +159,8 @@ def calcVratios(Veffs, Vmaxs):
 # raw and corrected lminosity function plot for all galaxies
 def allGalaxiesPlot(x, lumFunc, correctedLumFunc):
 	plt.clf()
-	plt.plot(x, lumFunc, "r", label="Raw Luminosity Function")
-	plt.plot(x, correctedLumFunc, "b", label="Corrected Luminosity Function")
+	plt.plot(x, lumFunc, "c--", label="Raw Luminosity Function")
+	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
 	plt.xlabel("Absolute Magnitude")
@@ -172,8 +172,8 @@ def allGalaxiesPlot(x, lumFunc, correctedLumFunc):
 def redBluePlot(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 	print("redblue")
 	plt.clf()
-	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
-	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
+	plt.plot(x1, redLumFunc, "r.", label="Corrected Luminosity Function for Red Galaxies")
+	plt.plot(x2, blueLumFunc, "b--", label="Corrected Luminosity Function for Blue Galaxies")
 	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
@@ -201,10 +201,10 @@ def schecter(M):
 def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 	print("redblue schecter")
 	plt.clf()
-	plt.plot(x1, redLumFunc, "r", label="Corrected Luminosity Function for Red Galaxies")
-	plt.plot(x2, blueLumFunc, "b", label="Corrected Luminosity Function for Blue Galaxies")
+	plt.plot(x1, redLumFunc, "r.", label="Corrected Luminosity Function for Red Galaxies")
+	plt.plot(x2, blueLumFunc, "b--", label="Corrected Luminosity Function for Blue Galaxies")
 	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
-	plt.plot(x, schecter(x), "y", label="Schecter Function")
+	plt.plot(x, schecter(x), "yo", label="Schecter Function")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
 	plt.xlabel("Absolute Magnitude")
