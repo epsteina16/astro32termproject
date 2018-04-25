@@ -204,7 +204,7 @@ def redBluePlotSchecter(x, correctedLumFunc, x1, redLumFunc, x2, blueLumFunc):
 	plt.plot(x1, redLumFunc, "r.", label="Corrected Luminosity Function for Red Galaxies")
 	plt.plot(x2, blueLumFunc, "b--", label="Corrected Luminosity Function for Blue Galaxies")
 	plt.plot(x, correctedLumFunc, "g", label="Corrected Luminosity Function for all Galaxies")
-	plt.plot(x, schecter(x), "yo", label="Schecter Function")
+	plt.plot(x, schecter(x), "yo", label="Schecter Function, α=-1.13, M*=-20.8")
 	plt.legend(prop={'size': 7})
 	plt.yscale('log')
 	plt.xlabel("Absolute Magnitude")
